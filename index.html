@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Neon Typing — MVP</title>
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+
+  <style>
+    :root{
+      --bg0:#070A12;
+      --bg1:#0B1020;
+      --glass: rgba(255,255,255,.06);
+      --glass2: rgba(255,255,255,.10);
+      --line: rgba(255,255,255,.12);
+      --txt: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.65);
+      --accent: #7df9ff; /* neon cyan */
+      --accent2: #a78bfa; /* neon purple */
+      --bad: #ff5c7c;
+      --good:#7CFFB2;
+    }
+
+    body{
+      min-height:100vh;
+      color: var(--txt);
+      background:
+        radial-gradient(1100px 600px at 20% 10%, rgba(125,249,255,.10), transparent 60%),
+        radial-gradient(900px 500px at 85% 20%, rgba(167,139,250,.10), transparent 55%),
+        radial-gradient(1200px 800px at 50% 100%, rgba(255,255,255,.04), transparent 60%),
+        linear-gradient(180deg, var(--bg0), var(--bg1));
+      overflow-x:hidden;
+    }
+
+    .frame{
+      max-width: 980px;
+    }
+
+    .glass{
+      background: linear-gradient(180deg, var(--glass), rgba(255,255,255,.03));
+      border: 1px solid var(--line);
+      box-shadow: 0 20px 60px rgba(0,0,0,.45);
+      border-radius: 18px;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+
+    .brand{
+      letter-spacing:.12em;
+      text-transform: uppercase;
+      font-weight: 700;
+      font-size: .9rem;
+      color: var(--muted);
+    }
+
+    .title{
+      font-weight: 800;
+      font-size: 1.6rem;
+      letter-spacing: .02em;
+      margin: 0;
+    }
+
+    .chip{
+      border: 1px solid var(--line);
+      background: rgba(0,0,0,.25);
+      border-radius: 999px;
+      padding: .35rem .65rem;
+      font-size: .85rem;
+      color: var(--muted);
+    }
+
+    .btn-neon{
+      border: 1px solid rgba(125,249,255,.35);
+      background: rgba(125,249,255,.08);
+      color: var(--txt);
+      border-radius: 12px;
+      padding: .55rem .85rem;
+      box-shadow: 0 0 0 rgba(125,249,255,0);
+      transition: all .15s ease;
+    }
+    .btn-neon:hover{
+      transform: translateY(-1px);
+      box-shadow: 0 10px 30px rgba(125,249,255,.10);
+      border-color: rgba(125,249,255,.55);
+    }
+
+    .btn-ghost{
+      border: 1px solid var(--line);
+      background: rgba(0,0,0,.18);
+      color: var(--txt);
+      border-radius: 12px;
+      padding: .55rem .85rem;
+    }
+
+    .panel-label{
+      color: var(--muted);
+      font-size: .9rem;
+      margin-bottom: .5rem;
+    }
+
+    .target{
+      border: 1px solid var(--line);
+      background: rgba(0,0,0,.20);
+      border-radius: 14px;
+      padding: 14px;
+      min-height: 120px;
+      max-height: 220px;
+      overflow:auto;
+      line-height: 1.55;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: .95rem;
+    }
+
+    .typebox{
+      border: 1px solid var(--line) !important;
+      background: rgba(0,0,0,.22) !important;
+      color: var(--txt) !important;
+      border-radius: 14px !important;
+      min-height: 140px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: .95rem;
+      padding: 14px;
+    }
+    .typebox:focus{
+      box-shadow: 0 0 0 .2rem rgba(125,249,255,.15) !important;
+      border-color: rgba(125,249,255,.55) !important;
+    }
+
+    .stat{
+      border: 1px solid var(--line);
+      background: rgba(0,0,0,.18);
+      border-radius: 14px;
+      padding: .75rem .9rem;
+    }
+    .stat .k{
+      color: var(--muted);
+      font-size: .82rem;
+      letter-spacing:.04em;
+      text-transform: uppercase;
+    }
+    .stat .v{
+      font-size: 1.25rem;
+      font-weight: 800;
+    }
+
+    .hint{
+      color: var(--muted);
+      font-size: .9rem;
+    }
+
+    .badge-soft{
+      border: 1px solid var(--line);
+      background: rgba(0,0,0,.20);
+      color: var(--muted);
+      border-radius: 999px;
+      padding: .25rem .55rem;
+      font-size: .8rem;
+    }
+
+    .footer-note{
+      color: rgba(255,255,255,.45);
+      font-size: .85rem;
+    }
+
+    .ok{ color: var(--good); }
+    .bad{ color: var(--bad); }
+  </style>
+</head>
+
+<body>
+  <div class="container py-5">
+    <div class="frame mx-auto">
+      <div class="glass p-4 p-md-5">
+        <div class="d-flex flex-column flex-md-row justify-content-between gap-3 align-items-start align-items-md-center mb-4">
+          <div>
+            <div class="brand">NEON TYPING // MVP</div>
+            <h1 class="title">Escribe el texto lo más rápido posible</h1>
+            <div class="hint mt-2">Carga un <span class="badge-soft">.txt</span> o usa el texto demo. El tiempo empieza cuando escribes el primer carácter.</div>
+          </div>
+
+          <div class="d-flex gap-2 flex-wrap">
+            <label class="btn btn-neon mb-0">
+              Cargar .txt
+              <input id="fileInput" type="file" accept=".txt,text/plain" hidden>
+            </label>
+            <button id="demoBtn" class="btn btn-ghost">Texto demo</button>
+            <button id="resetBtn" class="btn btn-ghost">Reset</button>
+          </div>
+        </div>
+
+        <div class="row g-3">
+          <div class="col-12 col-lg-7">
+            <div class="panel-label">Texto objetivo</div>
+            <div id="target" class="target"></div>
+            <div class="d-flex justify-content-between mt-2">
+              <div class="hint">
+                Progreso: <span id="progress" class="chip">0 / 0</span>
+              </div>
+              <div class="hint">
+                Estado: <span id="status" class="chip">Listo</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12 col-lg-5">
+            <div class="row g-3">
+              <div class="col-6">
+                <div class="stat">
+                  <div class="k">Tiempo</div>
+                  <div id="time" class="v">0.00s</div>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="stat">
+                  <div class="k">WPM</div>
+                  <div id="wpm" class="v">0</div>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="stat">
+                  <div class="k">Precisión</div>
+                  <div id="acc" class="v">100%</div>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="stat">
+                  <div class="k">Errores</div>
+                  <div id="errors" class="v">0</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-3">
+              <div class="panel-label">Tu entrada</div>
+              <textarea id="input" class="form-control typebox" placeholder="Empieza a escribir aquí..." disabled></textarea>
+              <div class="d-flex justify-content-between align-items-center mt-2">
+                <div class="hint">
+                  Tip: pega texto también funciona (Ctrl+V).
+                </div>
+                <div class="hint">
+                  <span class="badge-soft">Enter</span> cuenta como salto de línea si el texto lo tiene.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <hr class="my-4" style="border-color: var(--line); opacity:1;">
+
+        <div class="d-flex flex-column flex-md-row gap-2 justify-content-between align-items-start align-items-md-center">
+          <div class="footer-note">
+            Futuro: resaltado de errores en vivo, modo por palabras, leaderboard local, y selección de dificultad.
+          </div>
+          <div class="d-flex gap-2">
+            <span class="chip">Tema: glass/dark</span>
+            <span class="chip">Entrada: .txt</span>
+            <span class="chip">JS: vanilla</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- Estado ---
+    const ui = {
+      fileInput: document.getElementById('fileInput'),
+      demoBtn: document.getElementById('demoBtn'),
+      resetBtn: document.getElementById('resetBtn'),
+      target: document.getElementById('target'),
+      input: document.getElementById('input'),
+      progress: document.getElementById('progress'),
+      status: document.getElementById('status'),
+      time: document.getElementById('time'),
+      wpm: document.getElementById('wpm'),
+      acc: document.getElementById('acc'),
+      errors: document.getElementById('errors'),
+    };
+
+    const state = {
+      text: "",
+      started: false,
+      finished: false,
+      startAt: 0,
+      timerId: null,
+    };
+
+    const DEMO_TEXT =
+`La quietud es una ilusión: incluso al descansar, tus átomos vibran, tu sangre circula y la Tierra rota sin pausa.
+Respira. Concéntrate. Escribe con precisión.`;
+
+    function setText(newText){
+      state.text = (newText ?? "").replace(/\r\n/g, "\n"); // normaliza saltos
+      ui.target.textContent = state.text || "(Carga un archivo .txt o usa el texto demo.)";
+      ui.progress.textContent = `0 / ${state.text.length}`;
+      ui.status.textContent = state.text ? "Listo" : "Sin texto";
+      ui.input.value = "";
+      ui.input.disabled = !state.text;
+      ui.input.focus();
+      stopTimer();
+      state.started = false;
+      state.finished = false;
+      ui.time.textContent = "0.00s";
+      ui.wpm.textContent = "0";
+      ui.acc.textContent = "100%";
+      ui.errors.textContent = "0";
+    }
+
+    function startTimer(){
+      state.started = true;
+      state.startAt = performance.now();
+      ui.status.textContent = "En curso";
+      state.timerId = setInterval(() => {
+        const t = (performance.now() - state.startAt) / 1000;
+        ui.time.textContent = `${t.toFixed(2)}s`;
+        updateWPM();
+      }, 60);
+    }
+
+    function stopTimer(){
+      if(state.timerId){
+        clearInterval(state.timerId);
+        state.timerId = null;
+      }
+    }
+
+    function computeErrors(typed, target){
+      const n = Math.min(typed.length, target.length);
+      let errs = 0;
+      for(let i=0;i<n;i++){
+        if(typed[i] !== target[i]) errs++;
+      }
+      // Si se pasó, cuenta el excedente como error
+      errs += Math.max(0, typed.length - target.length);
+      return errs;
+    }
+
+    function updateWPM(){
+      if(!state.started) return;
+      const elapsedMin = ((performance.now() - state.startAt) / 1000) / 60;
+      if(elapsedMin <= 0) return;
+
+      // WPM estándar aproximado: (caracteres / 5) / minutos
+      const chars = ui.input.value.length;
+      const wpm = Math.floor((chars / 5) / elapsedMin);
+      ui.wpm.textContent = String(Math.max(0, wpm));
+    }
+
+    function updateMetrics(){
+      const typed = ui.input.value;
+      const target = state.text;
+
+      ui.progress.textContent = `${typed.length} / ${target.length}`;
+
+      const errs = computeErrors(typed, target);
+      ui.errors.textContent = String(errs);
+
+      const total = Math.max(typed.length, 1);
+      const correct = Math.max(0, typed.length - errs);
+      const acc = Math.max(0, Math.min(100, (correct / total) * 100));
+      ui.acc.textContent = `${acc.toFixed(0)}%`;
+
+      // Fin si coincide exactamente
+      if(!state.finished && typed === target && target.length > 0){
+        state.finished = true;
+        stopTimer();
+        ui.status.textContent = "Completado ✓";
+        ui.status.classList.add("ok");
+      } else {
+        ui.status.classList.remove("ok");
+      }
+
+      // Indicador simple de error global en estado
+      if(errs > 0 && !state.finished){
+        ui.status.textContent = "En curso (con errores)";
+      } else if(state.started && !state.finished){
+        ui.status.textContent = "En curso";
+      }
+    }
+
+    // --- Eventos ---
+    ui.fileInput.addEventListener('change', async (e) => {
+      const file = e.target.files?.[0];
+      if(!file) return;
+
+      const text = await file.text();
+      setText(text.trim());
+      ui.fileInput.value = "";
+    });
+
+    ui.demoBtn.addEventListener('click', () => setText(DEMO_TEXT));
+    ui.resetBtn.addEventListener('click', () => setText(state.text));
+
+    ui.input.addEventListener('input', () => {
+      if(!state.text) return;
+      if(!state.started && ui.input.value.length > 0) startTimer();
+      if(state.finished) return; // si ya terminó, no recalcular estado
+      updateMetrics();
+    });
+
+    // Init
+    setText("");
+  </script>
+</body>
+</html>
