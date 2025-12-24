@@ -149,7 +149,7 @@ class TypingUI {
     const metrics = payload?.metrics;
     if (metrics?.finished) {
       this.stopTicker();
-      this.showResult(payload);
+      await this.showResult(payload);
     } else if (metrics?.started) {
       this.hideResult();
       this.startTicker();
@@ -163,7 +163,7 @@ class TypingUI {
       this.applyPayload(payload);
       if (payload?.metrics?.finished) {
         this.stopTicker();
-        this.showResult(payload);
+        await this.showResult(payload);
       }
     }, 150);
   }
@@ -213,25 +213,49 @@ class TypingUI {
     container.innerHTML = "";
     const typedLength = typed.length;
     const targetLength = target.length;
+    const lines = target.split("\n");
+    let cursorDrawn = false;
+    let index = 0;
 
-    for (let i = 0; i < targetLength; i++) {
-      const ch = target[i];
-      const span = document.createElement("span");
-      span.classList.add("char");
-      // Render spaces as middle dots for visibility; keep other UTF-8 as-is.
-      span.textContent = ch === " " ? "·" : ch;
+    lines.forEach((line, lineIdx) => {
+      const lineWrapper = document.createElement("div");
+      lineWrapper.classList.add("line");
 
-      if (i < typedLength) {
-        const correct = typed[i] === ch;
-        span.classList.add(correct ? "correct" : "incorrect");
+      for (let j = 0; j < line.length; j++) {
+        const ch = line[j];
+        const span = document.createElement("span");
+        span.classList.add("char");
+        span.textContent = ch === " " ? "·" : ch;
+
+        if (index < typedLength) {
+          const correct = typed[index] === ch;
+          span.classList.add(correct ? "correct" : "incorrect");
+        }
+
+        if (!cursorDrawn && index === typedLength && typedLength < targetLength) {
+          span.classList.add("cursor");
+          cursorDrawn = true;
+        }
+
+        lineWrapper.appendChild(span);
+        index += 1;
       }
 
-      if (i === typedLength && typedLength < targetLength) {
-        span.classList.add("cursor");
-      }
+      container.appendChild(lineWrapper);
 
-      container.appendChild(span);
-    }
+      // Render newline spacer without visible symbol
+      if (lineIdx < lines.length - 1) {
+        const br = document.createElement("div");
+        br.classList.add("line-break");
+        br.innerHTML = "&nbsp;";
+        if (!cursorDrawn && index === typedLength) {
+          br.classList.add("cursor");
+          cursorDrawn = true;
+        }
+        container.appendChild(br);
+        index += 1; // account for newline in index
+      }
+    });
 
     if (typedLength === targetLength && targetLength > 0) {
       // Add a cursor marker at the end to show completion.
@@ -242,9 +266,10 @@ class TypingUI {
     }
   }
 
-  showResult(payload) {
+  async showResult(payload) {
     if (!payload?.metrics) return;
     const { metrics, bank_progress: bank } = payload;
+    // Record UI metrics locally even if we auto-advance.
     this.ui.mTime.textContent = `${Number(metrics.elapsed_seconds).toFixed(2)}s`;
     this.ui.mWpm.textContent = String(metrics.wpm);
     this.ui.mAcc.textContent = `${Number(metrics.accuracy).toFixed(0)}%`;
@@ -254,11 +279,15 @@ class TypingUI {
         ? `${bank.position} / ${bank.total}`
         : "";
     this.ui.resultProgress.textContent = bankText;
-    if (bank && !bank.has_next) {
-      this.showSummary();
+
+    // If there are more levels, jump straight to the next text.
+    if (bank && bank.has_next) {
+      await this.next();
       return;
     }
-    this.setView("result");
+
+    // Last level: show only the summary table.
+    await this.showSummary();
   }
 
   hideResult() {

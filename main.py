@@ -25,7 +25,7 @@ def main() -> None:
         easy_drag=True,
         fullscreen=True,
     )
-    webview.start(debug=True)
+    webview.start(debug=False)
 
 
 if __name__ == "__main__":
