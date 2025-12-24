@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Typer</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+
+<body>
+  <main class="page">
+    <header class="top">
+      <div class="logo">typer</div>
+      <div id="progress" class="progress">0</div>
+    </header>
+
+    <section class="panel">
+      <div id="menuView" class="view active">
+        <div class="menu-actions">
+          <button id="startBtn" class="btn secondary">Jugar</button>
+          <button id="exitBtn" class="btn">Salir</button>
+        </div>
+      </div>
+
+      <div id="gameView" class="view">
+        <div class="typing-box" id="typingBox">
+          <div id="textRender" class="text-line" aria-label="Texto objetivo"></div>
+          <textarea
+            id="input"
+            class="hidden-input"
+            autocapitalize="off"
+            autocomplete="off"
+            spellcheck="false"
+            aria-label="Entrada de escritura"
+          ></textarea>
+        </div>
+      </div>
+
+      <div id="resultView" class="view">
+        <div class="metrics">
+          <div class="metric">
+            <div class="k">Tiempo</div>
+            <div id="mTime" class="v">0.00s</div>
+          </div>
+          <div class="metric">
+            <div class="k">WPM</div>
+            <div id="mWpm" class="v">0</div>
+          </div>
+          <div class="metric">
+            <div class="k">Precisión</div>
+            <div id="mAcc" class="v">100%</div>
+          </div>
+          <div class="metric">
+            <div class="k">Errores</div>
+            <div id="mErr" class="v">0</div>
+          </div>
+        </div>
+        <div id="resultProgress" class="muted"></div>
+        <div class="actions">
+          <button id="repeatBtn" class="btn">Repetir texto</button>
+          <button id="nextBtn" class="btn secondary">Continuar</button>
+        </div>
+      </div>
+
+      <div id="summaryView" class="view">
+        <div id="summaryList" class="summary-list"></div>
+        <div class="actions">
+          <button id="restartBtn" class="btn">Reiniciar</button>
+          <button id="backToMenuBtn" class="btn secondary">Menú</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="./main.js"></script>
+</body>
+</html>
